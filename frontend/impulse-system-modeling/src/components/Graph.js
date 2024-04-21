@@ -5,7 +5,7 @@ export default function GraphView(){
     
     const graph = {
         nodes: [
-            {id: 1, label: "Node 1", color: "red"},
+            {id: 1, label: "Node 1", color: "red", value: 1},
             {id: 2, label: "Node 2"},
             {id: 3, label: "Node 3"},
             {id: 4, label: "Node 4"},
@@ -16,7 +16,7 @@ export default function GraphView(){
             {id: 9, label: "Node 9"},
         ],
         edges: [
-            {from: 1, to: 1, color: "red"},
+            {from: 1, to: 1, color: "red", weight: 1, label: "1"},
             {from: 1, to: 7, color: "red"},
             {from: 1, to: 2},
         ]
@@ -26,7 +26,7 @@ export default function GraphView(){
             navigationButtons: true
         },
         edges: {
-            color: "yellow"
+            color: "yellow",
         },
         height: "900px",
         manipulation: {
@@ -60,8 +60,8 @@ export default function GraphView(){
     
     return(
         <div>
-            <Graph
-                graph={graph}
+            <Graph click={() => console.log("test")}
+                graph={graph}    
                 options={options}    
             />
         </div>
