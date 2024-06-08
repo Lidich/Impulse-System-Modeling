@@ -1,25 +1,33 @@
-package com.example.webNotes.entities;
+package com.example.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
-@Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Table(name = "systemusers")
+@Document(collection = "Users")
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SystemUser {
-    private @Id
-    @SequenceGenerator(name = "systemusersIdSeq", sequenceName = "systemusers_id_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "systemusersIdSeq") Long id;
+
+    @Id
+    @Field("_id")
+    private UUID id = UUID.randomUUID(); // Автоматическая генерация UUID
+
     private String login;
     private String password;
 
+    private LocalDateTime dateCreated;
+
     public SystemUser() {}
 
-    public SystemUser(String password, String login){
+    public SystemUser(String login, String password){
         this.login = login;
         this.password = password;
+        this.dateCreated = LocalDateTime.now();
     }
 
     @Override
@@ -27,21 +35,21 @@ public class SystemUser {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemUser systemUser = (SystemUser) o;
-        return Objects.equals(id, systemUser.id) &&
+        return
                 Objects.equals(login, systemUser.login) &&
                 Objects.equals(password, systemUser.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, password);
+        return Objects.hash(id, login, password, dateCreated);
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -68,5 +76,9 @@ public class SystemUser {
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
     }
 }
