@@ -625,19 +625,15 @@ impulseAddNodeButton.addEventListener('click', () => {
     document.getElementById(rowId).style.display = "flex"
 });
 
-
-
-
-
-//TEST BUTTON
-testButton.addEventListener('click', async () => {
+//SAVE SELECTED NETWORK BUTTON
+networkSaveButton.addEventListener('click', async ()=>{
     let linksForJson = []
     links.forEach(element => {
         linksForJson.push({source: element.source.id, target: element.target.id, value: element.value, label: element.label})
     })
     let jsonNetwork = {nodes: nodes, links: linksForJson}
     let data = {
-        name: "funnyNetwork",
+        name: document.getElementById("networkNameInput").value,
         userId: loggedUser.id,
         networkJson: JSON.stringify(jsonNetwork)
     }
@@ -661,6 +657,40 @@ testButton.addEventListener('click', async () => {
         let json = await response.json()
         console.log(json)
     }
+})
+
+//OPEN SELECTED NETWORK BUTTON
+openSelectedNetworkButton.addEventListener('click', async () => {
+    let network = null;
+    if(loggedUser == null) return;
+    else {
+        let url = "http://127.0.0.1:8080/api/networks/"+document.getElementById("networkSelect").value
+        const response = await fetch(url, {
+            method: "GET", // *GET, POST, PUT, DELETE, etc.
+            mode: "cors", // no-cors, *cors, same-origin
+            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: "same-origin", // include, *same-origin, omit
+            headers: {
+                "Content-Type": "application/json",
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: "follow", // manual, *follow, error
+            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            //body: JSON.stringify(data), // body data type must match "Content-Type" header
+        });
+        let json = await response.json()
+        console.log(json)
+        if(json!=null) network = JSON.parse(json.networkJson);
+        nodes = network.nodes;
+        links = network.links;
+        reRender();
+        console.log(links)
+    }
+})
+
+
+//TEST BUTTON
+testButton.addEventListener('click', async () => {
 });
 
 //SUBMIT EDIT NODE BUTTON
@@ -1008,6 +1038,32 @@ submitLoginButton.addEventListener('click', async ()=>{
         document.getElementById("LoginForm").style.display = "none"
         document.getElementById("registerButton").style.display = "none"
         loggedUser = json
+        document.getElementById("networkSelect").innerHTML = ""
+        if(loggedUser == null) return;
+        else{
+            let url = "http://127.0.0.1:8080/api/networks/allByUser?"+ new URLSearchParams({userId: loggedUser.id})
+            const response = await fetch(url, {
+                method: "GET", // *GET, POST, PUT, DELETE, etc.
+                mode: "cors", // no-cors, *cors, same-origin
+                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: "same-origin", // include, *same-origin, omit
+                headers: {
+                    "Content-Type": "application/json",
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: "follow", // manual, *follow, error
+                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                //body: JSON.stringify(data), // body data type must match "Content-Type" header
+            });
+            let jsonSelect = await response.json()
+            //console.log(json)
+            jsonSelect.forEach(element=>{
+                const opt = document.createElement("option")
+                opt.value = element.id
+                opt.text = element.name
+                document.getElementById("networkSelect").appendChild(opt)
+            })
+        }
     }
     await console.log(json)
 })

@@ -164,7 +164,7 @@ button:active {
 }
 
 #testButton{
-    visibility: visible;
+    visibility: hidden;
 }
 
 #returnEditNetworkButton{
