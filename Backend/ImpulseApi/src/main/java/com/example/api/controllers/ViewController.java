@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 //@RequestMapping("")
 public class ViewController {
-    @GetMapping(path = "/hello")
+    @GetMapping(path = "/main")
     public String hello() {
         return "createPage.html";
     }

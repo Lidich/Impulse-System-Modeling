@@ -2,7 +2,7 @@ var data = {}
 
 import { createChart, createMatrixInput } from './components.js';
 
-await fetch('../jsonData/data3.json')
+await fetch('../jsonData/data5.json')
     .then((response) => response.json())
     .then((json) => data = json);
 
@@ -53,6 +53,7 @@ var firstNodeForLink = {}
 var secondNodeForLink = {}
 
 var tempNodeForEdit = {}
+var tempLinkForEdit = {}
 
 var impulseSteps = 0
 
@@ -101,7 +102,7 @@ var simulation = d3.forceSimulation(nodes)
     .force("link", d3.forceLink(links).id(d => d.id).distance(100))
     .force("charge", d3.forceManyBody().strength(-1))
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collide", d3.forceCollide().radius(50)) // Добавляем силу коллизии
+    .force("collide", d3.forceCollide().radius(88)) // Добавляем силу коллизии
     .on("tick", ticked);
 
 // Create the SVG container.
@@ -124,7 +125,8 @@ svg.append("defs").append("marker")
     .attr("orient", "auto")
     .append("path")
     .attr("d", "M 0 0 L 10 5 L 0 10 Z") // Треугольная стрелка
-    .attr("fill", "#999");
+    .attr("fill", "#999")
+    .on("click", editLink)
 
 // Добавляем линии для рёбер
 var link = svg.append("g")
@@ -134,7 +136,9 @@ var link = svg.append("g")
     .data(links)
     .join("line")
     .attr("stroke-width", 2)
-    .attr("marker-end", "url(#arrowhead)"); // Используем маркер стрелки
+    .attr("marker-end", "url(#arrowhead)")
+    .on("click", editLink)
+; // Используем маркер стрелки
 
 function updateLineView() {
     link = link
@@ -142,7 +146,8 @@ function updateLineView() {
         .join(
             enter => enter.append("line")
                 .attr("stroke-width", 2)
-                .attr("marker-end", "url(#arrowhead)"), // Инициализация новых элементов
+                .attr("marker-end", "url(#arrowhead)")
+                .on("click", editLink),// Инициализация новых элементов
             update => update.attr("stroke-width", 2)
                 .attr("marker-end", "url(#arrowhead)"), // Обновление существующих элементов
             exit => exit.remove() // Удаление вышедших элементов
@@ -165,7 +170,12 @@ function updateNodeView(){
     node = node
         .data(nodes)
         .join(
-            enter => enter.append("circle").attr("r", 0).attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))).on("click", nodeClicked)
+            enter => enter.append("circle").attr("r", 0)
+                .attr("fill", d => {
+                    console.log(d)
+                    return color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))
+                }
+                ).on("click", nodeClicked)
                 .call(enter => enter.transition().attr("r", 25)),
             update => update.transition() // Добавляем переход для плавного обновления
                 .attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))), // Обновляем цвет для существующих узлов,
@@ -179,14 +189,16 @@ var linkText = svg.append("g")
     .data(links)
     .join("text")
     .attr("class", "link-text")
-    .text(d => d.value);
+    .text(d => d.value)
+    .on("click", editLink);
 
 function updateLinkTextView(){
     linkText = linkText
         .data(links)
         .join("text")
         .attr("class", "link-text")
-        .text(d => d.value);
+        .text(d => d.value)
+        .on("click", editLink);
 }
 
 // Добавляем группу для текста
@@ -213,7 +225,7 @@ var circlesValueText = svg.append("g")
     .data(nodes)
     .join("text")
     .attr("class", "circle-text")
-    .text(d => "value: "+d.value)
+    .text(d => d.value)
     .on("click", nodeClicked);
 
 function updateCirclesValueTextView() {
@@ -221,7 +233,7 @@ function updateCirclesValueTextView() {
         .data(nodes)
         .join("text")
         .attr("class", "circle-text")
-        .text(d => "value: "+d.value)
+        .text(d => d.value)
         .on("click", nodeClicked);
 }
 
@@ -261,10 +273,10 @@ function ticked() {
     linkText.attr("x", d => (d.source.x + d.target.x) / 2)
         .attr("y", d => (d.source.y + d.target.y) / 2);
 
-    circlesText.attr("x", d => d.x - 25)
+    circlesText.attr("x", d => d.x - 5 )
         .attr("y", d => d.y);
 
-    circlesValueText.attr("x", d => d.x - 25)
+    circlesValueText.attr("x", d => d.x - 5)
         .attr("y", d => d.y+15);
 }
 
@@ -288,6 +300,26 @@ function dragended(event) {
     event.subject.fx = null;
     event.subject.fy = null;
 }
+
+function editLink(event){
+    if(statusFlag != statusFlagConstants.editNodeStarted) return
+    console.log("hello")
+    let tempLink = event.srcElement.__data__
+    tempLinkForEdit = tempLink
+    document.getElementById("editLinkValueInput").value = tempLinkForEdit.value
+    document.getElementById("linkForm").style.display = "block"
+}
+
+submitEditLinkButton.addEventListener("click", () => {
+    links.forEach(element => {
+        if(element.source == tempLinkForEdit.source && element.target == tempLinkForEdit.target){
+            element.value = document.getElementById("editLinkValueInput").value;
+        }
+    })
+    document.getElementById("linkForm").style.display = "none"
+    statusFlag = statusFlagConstants.idle
+    reRender()
+})
 
 // When this cell is re-run, stop the previous simulation. (This doesn’t
 // really matter since the target alpha is zero and the simulation will
@@ -970,7 +1002,11 @@ doImpulseStepButton.addEventListener('click', () => {
     });
     document.getElementById("impulseStepSpan").innerHTML = "current impulse step: " + currImpulseStep
     document.getElementById("impulseChartContainer").style.display = "flex"
-    createChart("impulseChartContainer", resValues)
+    let nodeNames = [];
+    for (let i=0;i<nodes.length;i++){
+        nodeNames.push(nodesNumberNodeMap.get(i).text)
+    }
+    createChart("impulseChartContainer", resValues, nodeNames)
 });
 //SUBMIT EDIT NETWORK BUTTON
 submitBuiltNetworkButton.addEventListener('click', ()=>{
@@ -980,7 +1016,7 @@ submitBuiltNetworkButton.addEventListener('click', ()=>{
 
     document.getElementById("network-edit-menu").style.visibility = "hidden"
     document.getElementById("impulseEditor").style.visibility = "visible"
-    document.getElementById("returnEditNetworkButton").style.visibility = "visible"
+    document.getElementById("returnEditNetworkButton").style.display = "block"
 
     resetImpulseEditing()
 })
@@ -993,7 +1029,7 @@ returnEditNetworkButton.addEventListener('click', ()=>{
     document.getElementById("impulseChartContainer").style.display = "none"
     document.getElementById("network-edit-menu").style.visibility = "visible"
     document.getElementById("impulseEditor").style.visibility = "hidden"
-    document.getElementById("returnEditNetworkButton").style.visibility = "hidden"
+    document.getElementById("returnEditNetworkButton").style.display = "block"
     impulseSteps = 0;
     currImpulseStep = 0;
 })
@@ -1037,6 +1073,7 @@ submitLoginButton.addEventListener('click', async ()=>{
         document.getElementById("loginFormStatus").innerHTML = ""
         document.getElementById("LoginForm").style.display = "none"
         document.getElementById("registerButton").style.display = "none"
+        document.getElementById("networkSaveButton").style.display = "block";
         loggedUser = json
         document.getElementById("networkSelect").innerHTML = ""
         if(loggedUser == null) return;
@@ -1056,13 +1093,21 @@ submitLoginButton.addEventListener('click', async ()=>{
                 //body: JSON.stringify(data), // body data type must match "Content-Type" header
             });
             let jsonSelect = await response.json()
-            //console.log(json)
+            let emptyF = 0;
             jsonSelect.forEach(element=>{
+                console.log(jsonSelect)
+                if(emptyF==0){
+                    document.getElementById("networkSelect").style.display = "block";
+                    document.getElementById("openSelectedNetworkButton").style.display = "block";
+                }
+                emptyF=1;
                 const opt = document.createElement("option")
                 opt.value = element.id
-                opt.text = element.name
+                if(element.name == null || element.name== "") opt.text = "empty name network"
+                else opt.text = element.name
                 document.getElementById("networkSelect").appendChild(opt)
             })
+            document.getElementById("networkNameInputContainer").style.display = "block";
         }
     }
     await console.log(json)
@@ -1125,4 +1170,10 @@ function resetImpulseEditing(){
     document.getElementById("impulseChartContainer").style.display = "none"
     document.getElementById("impulseStepSpan").innerHTML = ""
 }
+
+if(loggedUser==null) document.getElementById("networkSelect").style.display = "none";
+if(loggedUser==null) document.getElementById("networkNameInputContainer").style.display = "none";
+if(loggedUser==null) document.getElementById("returnEditNetworkButton").style.display = "none";
+if(loggedUser==null) document.getElementById("openSelectedNetworkButton").style.display = "none";
+if(loggedUser==null) document.getElementById("networkSaveButton").style.display = "none";
 

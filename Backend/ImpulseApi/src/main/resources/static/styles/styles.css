@@ -1,33 +1,32 @@
 #container{
-    width: 50%;
-    height: 800px;
+    width: 60%;
+    height: 83%;
     border: #1f77b4  10px solid;
     background-color: aliceblue;
     display: flex;
     justify-content: center;
     position: absolute;
-    top: 110px; left: 5px;
+    top: 12%; left: 1%;
 }
 
 #impulseChartContainer{
-    width: 1000px;
-    height: 450px;
+    width: 35%;
+    height: 48%;
     border: #1f77b4  10px solid;
     background-color: aliceblue;
     display: none;
     justify-content: center;
     position: absolute;
-    top: 110px; left: 1090px;
+    top: 12%; left: 62%;
 }
 
 .impulseEditor{
-    width: 1000px;
-    height: 350px;
+    width: 35%;
+    height: 35%;
     background-color: #ddd;
     display: none;
-
     position: absolute;
-    top: 560px; left: 1090px;
+    top: 60%; left: 62%;
 }
 
 svg{
@@ -52,12 +51,78 @@ body {
 
 #top-menu{
     width: 98%;
-    height: 77px;
+    height: 8%;
     background-color: aliceblue;
     border: #1f77b4  4px solid;
     position: fixed;
     opacity: 0.9;
     display: flex;
+    justify-content: space-between;
+}
+
+#top-menu button, input, select{
+    align-self: center;
+}
+
+#network-edit-menu{
+    display: flex;
+}
+
+#userTopMenu{
+    display: flex;
+    width: 55%;
+    justify-content: space-evenly;
+}
+
+#networkNameInput{
+    height: 33%;
+}
+
+#network-edit-menu{
+    display: flex;
+}
+
+#statusContainer{
+    align-self: center;
+    width: 22%;
+}
+
+#networkNameInputContainer{
+    align-self: center;
+}
+
+#userTopMenuSelect{
+    flex-wrap: wrap;
+}
+
+#userTopMenuSelect button, select{
+    width: 100%;
+}
+
+#userTopMenuSave{
+    flex-wrap: wrap;
+    width: 48%;
+    justify-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+#networkNameInputContainer{
+    flex-wrap: wrap;
+    justify-items: center;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+#userTopMenuSave button, label, input{
+    width: 100%;
+    text-align: center;
+}
+
+#userTopMenuSave input{
+    width: 98%;
+    text-align: center;
 }
 
 /* Button used to open the contact form - fixed at the bottom of the page */
@@ -108,8 +173,8 @@ body {
 
 button {
     display: inline-block;
-    padding: 10px 20px;
-    font-size: 12px;
+    padding: 5px 10px;
+    font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
     color: #fff;
@@ -164,10 +229,6 @@ button:active {
 }
 
 #testButton{
-    visibility: hidden;
-}
-
-#returnEditNetworkButton{
     visibility: hidden;
 }
 

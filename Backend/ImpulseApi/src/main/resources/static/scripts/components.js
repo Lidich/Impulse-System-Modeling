@@ -65,9 +65,36 @@ export function createMatrixInput(idPrefix, idContainer, rowCount, columnCount, 
     container.appendChild(table);
 }
 
-export function createChart(idContainer, resMatrix) {
+export function createChart(idContainer, resMatrix, nodeNames) {
+    console.log(nodeNames)
     // Шаг 1: Подготовка контейнера
     let container = document.getElementById(idContainer);
+
+    const color = d3.scaleSequential(d3.interpolateRdYlGn);
+
+    //color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1)))
+
+    let minNodeValue = null;
+    let maxNodeValue = null;
+    let length = resMatrix[0].length-1;
+    for(let i=0;i<resMatrix.length;i++){
+        let temp = resMatrix[i][length]
+        if(minNodeValue==null) minNodeValue=temp
+        if(maxNodeValue==null) maxNodeValue=temp
+        if(minNodeValue>temp) minNodeValue = temp
+        if(maxNodeValue<temp) maxNodeValue = temp
+    }
+    console.log(minNodeValue+" -minmax- "+maxNodeValue)
+
+    /*
+    var node = svg.append("g")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5)
+        .selectAll()
+        .data(nodes)
+        .join("circle")
+        .attr("r", 25)
+        .attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))).on("click", nodeClicked);*/
 
     if (!container) {
         console.error(`Container with id ${idContainer} not found.`);
@@ -171,7 +198,10 @@ export function createChart(idContainer, resMatrix) {
         svg.append("path")
             .datum(row)
             .attr("fill", "none")
-            .attr("stroke", "steelblue")
+            .attr("stroke", d => {
+                console.log(d)
+                return color((d[d.length-1]-minNodeValue)/(maxNodeValue-minNodeValue+1))
+            })
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
@@ -184,7 +214,17 @@ export function createChart(idContainer, resMatrix) {
             .attr("cx", (d, i) => xScale(i))
             .attr("cy", d => yScale(d))
             .attr("r", 3)
-            .attr("fill", "red");
+            .attr("fill", "red")
+            .attr("title", nodeNames[rowIndex])
+
+        // Добавление подписи в конце линии с отступом
+        const lastPoint = row[row.length - 1];
+        svg.append("text")
+            .attr("x", xScale(row.length - 1))
+            .attr("y", yScale(lastPoint))
+            .attr("text-anchor", "start")
+            .attr("fill", "black")
+            .text(nodeNames[rowIndex]);
     });
 
     // Добавление созданного SVG в контейнер

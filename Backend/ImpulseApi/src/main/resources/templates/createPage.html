@@ -11,22 +11,24 @@
 <body id="body">
 <header>
     <div id="top-menu">
-        <span style="background-color: red;">status: </span>
-        <span id="status" style="background-color: red;">status</span>
+        <div id="statusContainer">
+            <span style="background-color: red;">status: </span>
+            <span id="status" style="background-color: red;">status</span>
+        </div>
         <button id="returnEditNetworkButton">return to "edit network" mode</button>
         <div id="network-edit-menu">
             <button id="addNewNodeButton">
-                add new node
+                Добавить вершину
             </button>
             <button id="addNewLinkButton">
-                add new link
+                Добавить ребро
             </button>
             <button id="editNodeButton">
-                edit node
+                Редактировать элемент
             </button>
 
             <button id="submitBuiltNetworkButton">
-                submit built network
+                Закончить построение графа
             </button>
             <a href="graphic.html" class="goToLink">
                 <button id="goTo">
@@ -34,12 +36,20 @@
                 </button>
             </a>
         </div>
-        <button id="loginButton">login</button>
-        <button id="registerButton">register</button>
-        <select id="networkSelect"></select>
-        <button id="networkSaveButton">save this network</button>
-        <button id="openSelectedNetworkButton">open this network</button>
-        <input id="networkNameInput" type="text">
+        <div id="userTopMenu">
+            <button id="loginButton">login</button>
+            <button id="registerButton">register</button>
+            <div id="userTopMenuSelect">
+                <select id="networkSelect"></select>
+                <button id="openSelectedNetworkButton">открыть этот граф</button>
+            </div>
+            <div id="userTopMenuSave">
+                <div id="networkNameInputContainer"><label for="networkNameInput">имя графа</label>
+                    <input id="networkNameInput" type="text"></div>
+                <button id="networkSaveButton">сохранить этот граф</button>
+            </div>
+        </div>
+
     </div>
 </header>
 <div class="main" id="main">
@@ -104,6 +114,23 @@
         <button id="submitEditNodeButton" type="button" class="btn">Submit</button>
         <button id="deleteNodeButton" type="button" class="btn">Delete</button>
         <button id="editNodeCloseButton" type="button" class="btn cancel">Close</button>
+    </form>
+</div>
+
+<!-- Edit link form -->
+<div class="form-popup" id="linkForm" style="display: none">
+    <form action="/action_page.php" class="form-container">
+        <h1>Edit link</h1>
+
+        <label for="editLinkNameInput"><b>Link name</b></label>
+        <input id="editLinkNameInput" type="text" placeholder="Enter node name" name="nodeName" required>
+
+        <label for="editLinkValueInput"><b>Link value</b></label>
+        <input id="editLinkValueInput" type="number" placeholder="Enter node value" name="nodeValue" required>
+
+        <button id="submitEditLinkButton" type="button" class="btn">Submit</button>
+        <button id="deleteLinkButton" type="button" class="btn">Delete</button>
+        <button id="editLinkCloseButton" type="button" class="btn cancel" onclick="document.getElementById('linkForm').style.display='none'">Close</button>
     </form>
 </div>
 
