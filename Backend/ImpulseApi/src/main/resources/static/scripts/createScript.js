@@ -59,6 +59,8 @@ var impulseSteps = 0
 
 var loggedUser = null
 
+var nodeRadius = 40
+
 function setStatusText() {
     if (statusFlag == statusFlagConstants.idle) statusText.innerHTML = "idle";
     if (statusFlag == statusFlagConstants.addNodeStart) statusText.innerHTML = "Добавление новой вершины. Нажмите на место, куда вы хотите добавить вершину";
@@ -95,7 +97,20 @@ function updateMinMaxNodeValue(){
     })
 }
 
+let maxLinkValue = 0
+let minLinkValue = 9999999
+
+function updateMinMaxLinkValue(){
+    links.forEach(element =>{
+        if (element.value>maxLinkValue) maxLinkValue = element.value
+        if (element.value<minLinkValue) minLinkValue = element.value
+    })
+    console.log(minLinkValue+" "+maxLinkValue)
+}
+
+
 updateMinMaxNodeValue()
+updateMinMaxLinkValue()
 
 // Create a simulation with several forces.
 var simulation = d3.forceSimulation(nodes)
@@ -118,7 +133,7 @@ var svg = d3.create("svg")
 svg.append("defs").append("marker")
     .attr("id", "arrowhead")
     .attr("viewBox", "0 0 10 10")
-    .attr("refX", 30) // Убедитесь, что значение refX соответствует длине стрелки
+    .attr("refX", 35) // Убедитесь, что значение refX соответствует длине стрелки
     .attr("refY", 5)
     .attr("markerWidth", 7)
     .attr("markerHeight", 7)
@@ -130,11 +145,11 @@ svg.append("defs").append("marker")
 
 // Добавляем линии для рёбер
 var link = svg.append("g")
-    .attr("stroke", "#999")
-    .attr("stroke-opacity", 0.6)
     .selectAll("line")
     .data(links)
     .join("line")
+    .attr("stroke", d => color((d.value-minLinkValue)/(maxLinkValue-minLinkValue+1)))
+    .attr("stroke-opacity", 0.6)
     .attr("stroke-width", 2)
     .attr("marker-end", "url(#arrowhead)")
     .on("click", editLink)
@@ -163,7 +178,7 @@ var node = svg.append("g")
     .selectAll()
     .data(nodes)
     .join("circle")
-    .attr("r", 25)
+    .attr("r", nodeRadius)
     .attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))).on("click", nodeClicked);
 
 function updateNodeView(){
@@ -176,9 +191,10 @@ function updateNodeView(){
                     return color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))
                 }
                 ).on("click", nodeClicked)
-                .call(enter => enter.transition().attr("r", 25)),
+                .call(enter => enter.transition().attr("r", nodeRadius)),
             update => update.transition() // Добавляем переход для плавного обновления
-                .attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))), // Обновляем цвет для существующих узлов,
+                .attr("fill", d => color((d.value-minNodeValue)/(maxNodeValue-minNodeValue+1))) // Обновляем цвет для существующих узлов,
+                .call(update => update.attr("r", nodeRadius)),
             exit => exit.remove()
         );
 }
@@ -206,8 +222,17 @@ var circlesText = svg.append("g")
     .selectAll("text")
     .data(nodes)
     .join("text")
+    .attr("fill", "#f1f1f1")
     .attr("class", "circle-text")
-    .text(d => d.text)
+    .each(function(d) {
+        var words = d.text.split(' ');
+        words.forEach((word, i) => {
+            d3.select(this).append('tspan')
+                .attr('x', d => d.x)
+                .attr('dy', i == 0 ? '0em' : '1.0em')
+                .text(word);
+        });
+    })
     .on("click", nodeClicked);
 
 function updateCirclesTextView() {
@@ -215,7 +240,17 @@ function updateCirclesTextView() {
         .data(nodes)
         .join("text")
         .attr("class", "circle-text")
-        .text(d => d.text)
+        .each(function(d) {
+            // Очистка старых tspan элементов
+            d3.select(this).selectAll('tspan').remove();
+            var words = d.text.split(' ');
+            words.forEach((word, i) => {
+                d3.select(this).append('tspan')
+                    .attr('x', d => d.x)
+                    .attr('dy', i == 0 ? '0em' : '1.0em')
+                    .text(word);
+            });
+        })
         .on("click", nodeClicked);
 }
 
@@ -273,11 +308,16 @@ function ticked() {
     linkText.attr("x", d => (d.source.x + d.target.x) / 2)
         .attr("y", d => (d.source.y + d.target.y) / 2);
 
-    circlesText.attr("x", d => d.x - 5 )
-        .attr("y", d => d.y);
+    circlesText.selectAll('tspan')
+        .attr('x', function(d) {
+            return d3.select(this.parentNode).attr('x');
+        });
 
-    circlesValueText.attr("x", d => d.x - 5)
-        .attr("y", d => d.y+15);
+    circlesText.attr("x", d => d.x-20)
+        .attr("y", d => d.y-8);
+
+    circlesValueText.attr("x", d => d.x - 10)
+        .attr("y", d => d.y+18);
 }
 
 // Reheat the simulation when drag starts, and fix the subject position.
@@ -610,6 +650,7 @@ impulseAddStepButton.addEventListener('click', () => {
     for (let i = 0;i<impulseSteps;i++){
         columnHeaders.push(i+1)
     }
+    document.getElementById("totalImpulseStepsSpan").innerHTML = "Количество шагов: "+impulseSteps;
     createMatrixInput("impulse", "impulseInputContainer", nodes.length, impulseSteps, rowHeaders, columnHeaders)
     document.getElementById("impulseRemoveStepButton").style.visibility = "visible"
     document.getElementById("impulseForNodeContainer").style.visibility = "visible"
@@ -627,6 +668,7 @@ impulseRemoveStepButton.addEventListener('click', () => {
             document.getElementById("impulseRemoveStepButton").style.visibility = "hidden"
             document.getElementById("impulseForNodeContainer").style.visibility = "hidden"
             document.getElementById("impulseSubmitButton").style.visibility = "hidden"
+            document.getElementById("totalImpulseStepsSpan").innerHTML = "Количество шагов: "+impulseSteps;
             return
         }
         let rowHeaders = []
@@ -643,6 +685,7 @@ impulseRemoveStepButton.addEventListener('click', () => {
         console.log("impulseRow:"+element)
         document.getElementById("impulseRow:"+element).style.display = "flex"
     })
+    document.getElementById("totalImpulseStepsSpan").innerHTML = "Количество шагов: "+impulseSteps;
 });
 
 //ADD IMPULSE FOR NODE BUTTON
@@ -985,7 +1028,7 @@ function getColumnMatrix(matrix, columnNumber){
 //DO IMPULSE STEP BUTTON
 doImpulseStepButton.addEventListener('click', () => {
     if(currImpulseStep==impulseSteps) {
-        document.getElementById("impulseStepSpan").innerHTML = "all impulses are applied"
+        document.getElementById("impulseStepSpan").innerHTML = "все шаги выполнены"
         return
     }
     doImpulseStep();
@@ -1000,7 +1043,7 @@ doImpulseStepButton.addEventListener('click', () => {
     elements.forEach(element => {
         element.className+= " activeColumn"
     });
-    document.getElementById("impulseStepSpan").innerHTML = "current impulse step: " + currImpulseStep
+    document.getElementById("impulseStepSpan").innerHTML = "номер текущего шага: " + currImpulseStep
     document.getElementById("impulseChartContainer").style.display = "flex"
     let nodeNames = [];
     for (let i=0;i<nodes.length;i++){
@@ -1017,6 +1060,8 @@ submitBuiltNetworkButton.addEventListener('click', ()=>{
     document.getElementById("network-edit-menu").style.visibility = "hidden"
     document.getElementById("impulseEditor").style.visibility = "visible"
     document.getElementById("returnEditNetworkButton").style.display = "block"
+    document.getElementById("totalImpulseStepsSpan").innerHTML = "Количество шагов: "+impulseSteps;
+    document.getElementById("container").style.width = "60%"
 
     resetImpulseEditing()
 })
@@ -1030,13 +1075,14 @@ returnEditNetworkButton.addEventListener('click', ()=>{
     document.getElementById("network-edit-menu").style.visibility = "visible"
     document.getElementById("impulseEditor").style.visibility = "hidden"
     document.getElementById("returnEditNetworkButton").style.display = "block"
+    document.getElementById("container").style.width = "96%"
     impulseSteps = 0;
     currImpulseStep = 0;
 })
 
 //LOGIN BUTTON
 loginButton.addEventListener('click', ()=>{
-    if(document.getElementById("loginButton").innerHTML!="login") return
+    if(document.getElementById("loginButton").innerHTML!="войти") return
     document.getElementById("LoginForm").style.display = "block"
     document.getElementById("main").style.opacity = 0.3
     document.getElementById("top-menu").style.opacity = 0.3
@@ -1115,11 +1161,16 @@ submitLoginButton.addEventListener('click', async ()=>{
 
 //REGISTER BUTTON
 registerButton.addEventListener('click', ()=>{
-    if(document.getElementById("loginButton").innerHTML!="login") return
+    if(document.getElementById("loginButton").innerHTML!="войти") return
     document.getElementById("RegisterForm").style.display = "block"
     document.getElementById("main").style.opacity = 0.3
     document.getElementById("top-menu").style.opacity = 0.3
     console.log()
+})
+
+editLinkCloseButton.addEventListener('click', () =>{
+    document.getElementById('linkForm').style.display='none'
+    statusFlag = statusFlagConstants.idle
 })
 
 //REGISTER SUBMIT BUTTON
@@ -1165,7 +1216,7 @@ function resetImpulseEditing(){
     document.getElementById("impulseSubmitButton").style.visibility = "hidden"
     document.getElementById("impulseAddStepButton").style.visibility = "visible"
     document.getElementById("doImpulseStepButton").style.visibility = "hidden"
-    document.getElementById("impulseStepSpan").innerHTML = "current impulse step: 0"
+    document.getElementById("impulseStepSpan").innerHTML = "номер текущего шага: 0"
     document.getElementById("impulseInputContainer").innerHTML = ""
     document.getElementById("impulseChartContainer").style.display = "none"
     document.getElementById("impulseStepSpan").innerHTML = ""
@@ -1176,4 +1227,11 @@ if(loggedUser==null) document.getElementById("networkNameInputContainer").style.
 if(loggedUser==null) document.getElementById("returnEditNetworkButton").style.display = "none";
 if(loggedUser==null) document.getElementById("openSelectedNetworkButton").style.display = "none";
 if(loggedUser==null) document.getElementById("networkSaveButton").style.display = "none";
+
+document.getElementById("rangeSlider").addEventListener('input', () => {
+    let val = document.getElementById("rangeSlider").value
+    console.log(val)
+    nodeRadius = val
+    reRender()
+})
 

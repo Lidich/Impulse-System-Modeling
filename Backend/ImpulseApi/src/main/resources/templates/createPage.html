@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="/styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 
@@ -15,7 +16,7 @@
             <span style="background-color: red;">status: </span>
             <span id="status" style="background-color: red;">status</span>
         </div>
-        <button id="returnEditNetworkButton">return to "edit network" mode</button>
+        <button id="returnEditNetworkButton">вернуться к редактированию графа</button>
         <div id="network-edit-menu">
             <button id="addNewNodeButton">
                 Добавить вершину
@@ -27,6 +28,11 @@
                 Редактировать элемент
             </button>
 
+            <div class="slidecontainer" style="align-self: center; text-align: center">
+                <label for="rangeSlider">радиус вершин</label>
+                <input id="rangeSlider" type="range" min="1" max="100" value="50" class="slider">
+            </div>
+
             <button id="submitBuiltNetworkButton">
                 Закончить построение графа
             </button>
@@ -37,8 +43,8 @@
             </a>
         </div>
         <div id="userTopMenu">
-            <button id="loginButton">login</button>
-            <button id="registerButton">register</button>
+            <button id="loginButton">войти</button>
+            <button id="registerButton">зарегистрироваться</button>
             <div id="userTopMenuSelect">
                 <select id="networkSelect"></select>
                 <button id="openSelectedNetworkButton">открыть этот граф</button>
@@ -80,20 +86,20 @@
     <div id="impulseChartContainer"></div>
     <div class="impulseEditor" id="impulseEditor">
         <div class="impulseEditor-header">
-            <span>IMPULSE STEPS:</span>
+            <span id="totalImpulseStepsSpan">Количество шагов: </span>
             <button id="impulseAddStepButton">+</button>
             <button id="impulseRemoveStepButton">-</button>
-            <button id="impulseSubmitButton">submit impulse input</button>
+            <button id="impulseSubmitButton">закончить ввод импульсов</button>
             <div id="impulseForNodeContainer">
-                <button id="impulseAddNodeButton">add impulse for this node:</button>
+                <button id="impulseAddNodeButton">добавить импульс к:</button>
 
                 <br>
                 <select style="width: 100%;" id="nodeForImpulseSelect"></select>
             </div>
             <div id="doImpuleStepContainer">
-                <button id="doImpulseStepButton">do impulse step</button>
+                <button id="doImpulseStepButton">выполнить шаг</button>
                 <br>
-                <span id="impulseStepSpan">current impulse step: 0</span>
+                <span id="impulseStepSpan">номер текущего шага: 0</span>
             </div>
         </div>
         <div id="impulseInputContainer"></div>
@@ -130,7 +136,7 @@
 
         <button id="submitEditLinkButton" type="button" class="btn">Submit</button>
         <button id="deleteLinkButton" type="button" class="btn">Delete</button>
-        <button id="editLinkCloseButton" type="button" class="btn cancel" onclick="document.getElementById('linkForm').style.display='none'">Close</button>
+        <button id="editLinkCloseButton" type="button" class="btn cancel">Close</button>
     </form>
 </div>
 

@@ -1,5 +1,5 @@
 #container{
-    width: 60%;
+    width: 96%;
     height: 83%;
     border: #1f77b4  10px solid;
     background-color: aliceblue;
@@ -44,9 +44,11 @@ svg{
 body {
     caret-color: transparent;
     user-select: none;
-    font-family: "Comic Sans MS", cursive, sans-serif;
+    /*font-family: "Comic Sans MS", cursive, sans-serif;*/
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
     background-color: black;
-
+    font-weight: bold;
 }
 
 #top-menu{
@@ -154,11 +156,12 @@ body {
     max-width: 300px;
     padding: 10px;
     background-color: white;
+    height: 96%;
 }
 
 /* Full-width input fields */
 .form-container input[type=text], .form-container input[type=password] {
-    width: 100%;
+    width: 90%;
     padding: 15px;
     margin: 5px 0 22px 0;
     border: none;
@@ -197,7 +200,9 @@ button:active {
 
 .impulseEditor-header{
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
+    align-content: center;
+    align-items: center;
 }
 
 #doImpulseStepButton{
@@ -251,5 +256,28 @@ button:active {
 
 #myForm{
     display: none;
+    background-color: #f1f1f1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+    text-align: left;
+}
+th, td {
+    /*padding: 12px 15px;*/
+    border: 1px solid #ddd;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+tr:hover {
+    background-color: #f1f1f1;
+}
+th {
+    background-color: #4CAF50;
+    color: white;
 }
 
